@@ -2,10 +2,10 @@ use serde::{Deserialize, Serialize};
 use std::{fs::File as StdFile, io::BufReader};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "kebab-case")]
 struct Xliff {
     version: String,
     xmln: String,
-    //#[serde(rename = "$value")]
     file: File,
 }
 
@@ -26,6 +26,7 @@ struct Body {
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "kebab-case")]
 struct TransUnit {
     id: String,
     source: String,
@@ -33,8 +34,7 @@ struct TransUnit {
 
 fn main() {
     let f = StdFile::open("test.xliff").expect("Could not open file");
-    let mut reader = BufReader::new(f);
     let xliff: Xliff =
-        serde_xml_rs::de::from_reader(reader).expect("Could not create Xliff object");
+        serde_xml_rs::de::from_reader(BufReader::new(f)).expect("Could not create Xliff object");
     println!("{:#?}", xliff);
 }
