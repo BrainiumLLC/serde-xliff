@@ -50,6 +50,7 @@ version = "0.1.0"
 dependencies = [
  "serde",
  "serde-xml-rs",
+ "thiserror",
 ]
 
 [[package]]
