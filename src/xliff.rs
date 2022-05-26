@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub struct TransUnit {
-    id: String,
-    source: String,
+    pub id: String,
+    pub source: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
