@@ -11,8 +11,13 @@ use xliff::Xliff;
 pub enum XliffError {
     #[error("path {0:?} contained invalid utf-8")]
     InvalidUtf8(PathBuf),
-    #[error("path {path:?} contained invalid utf-8")]
+    #[error("path {path:?} contained invalid utf-8: {source:?}")]
     CouldNotOpenFile {
+        path: PathBuf,
+        source: std::io::Error,
+    },
+    #[error("could not dir at {path:?}: {source:?}")]
+    CouldNotReadDir {
         path: PathBuf,
         source: std::io::Error,
     },
@@ -31,7 +36,12 @@ impl StringFiles {
     pub fn from_source_dir(path: impl AsRef<Path>) -> Result<Self, XliffError> {
         let path = path.as_ref();
         let mut files = StringFiles::default();
-        for localization in std::fs::read_dir(&path).unwrap() {
+        for localization in
+            std::fs::read_dir(&path).map_err(|source| XliffError::CouldNotReadDir {
+                path: path.to_owned(),
+                source,
+            })?
+        {
             if let Ok(entry) = localization {
                 assert!(entry.file_type().unwrap().is_dir());
                 let directory = entry.file_name();
