@@ -16,7 +16,7 @@ pub enum XliffError {
         path: PathBuf,
         source: std::io::Error,
     },
-    #[error("could not dir at {path:?}: {source:?}")]
+    #[error("could not read dir at {path:?}: {source:?}")]
     CouldNotReadDir {
         path: PathBuf,
         source: std::io::Error,
