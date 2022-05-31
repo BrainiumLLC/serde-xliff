@@ -20,6 +20,21 @@ impl<'de> Visitor<'de> for ArgumentStringVisitor {
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         formatter.write_str("a string with optional arguments marked by `%`")
     }
+
+    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        self.visit_string(value.to_string())
+    }
+
+    fn visit_string<E>(self, value: String) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        let argument_string = value.into();
+        Ok(argument_string)
+    }
 }
 
 impl<'de> Deserialize<'de> for ArgumentString {
