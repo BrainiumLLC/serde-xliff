@@ -15,7 +15,7 @@ impl From<String> for ArgumentString {
             .map(str::to_string)
             .collect::<Vec<_>>();
         let format_string = separator
-            .replace(&string, |caps: &Captures| format!("{{arg_{}}}", &caps[1]))
+            .replace_all(&string, |caps: &Captures| format!("{{arg_{}}}", &caps[1]))
             .to_string();
         Self {
             sections,
