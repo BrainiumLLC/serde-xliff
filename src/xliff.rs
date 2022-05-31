@@ -1,3 +1,4 @@
+use regex::Captures;
 use serde::{de::Visitor, Deserialize, Deserializer};
 
 #[derive(Debug)]
@@ -8,12 +9,14 @@ pub struct ArgumentString {
 
 impl From<String> for ArgumentString {
     fn from(string: String) -> Self {
-        let separator = regex::Regex::new(r"%[0-9]+").unwrap();
+        let separator = regex::Regex::new(r"%([0-9]+)").unwrap();
         let sections = separator
             .split(&string)
             .map(str::to_string)
             .collect::<Vec<_>>();
-        let format_string = string.replace("%", "{}");
+        let format_string = separator
+            .replace(&string, |caps: &Captures| format!("{{arg_{}}}", &caps[1]))
+            .to_string();
         Self {
             sections,
             format_string,
