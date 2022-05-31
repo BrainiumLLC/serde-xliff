@@ -3,7 +3,7 @@ use serde::{de::Visitor, Deserialize, Deserializer};
 #[derive(Debug)]
 pub struct ArgumentString {
     pub sections: Vec<String>,
-    format_string: String,
+    pub format_string: String,
 }
 
 impl From<String> for ArgumentString {
