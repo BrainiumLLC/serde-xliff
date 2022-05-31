@@ -8,7 +8,11 @@ pub struct ArgumentString {
 
 impl From<String> for ArgumentString {
     fn from(string: String) -> Self {
-        let sections = string.split("%").map(str::to_string).collect::<Vec<_>>();
+        let separator = regex::Regex::new(r"%[0-9]+").unwrap();
+        let sections = separator
+            .split(&string)
+            .map(str::to_string)
+            .collect::<Vec<_>>();
         let format_string = string.replace("%", "{}");
         Self {
             sections,
