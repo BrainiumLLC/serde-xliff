@@ -2,8 +2,7 @@ use serde::{de::Visitor, Deserialize, Deserializer};
 
 #[derive(Debug)]
 pub struct ArgumentString {
-    // TODO: `&'static str`?
-    sections: Vec<String>,
+    pub sections: Vec<String>,
 }
 
 impl From<String> for ArgumentString {
