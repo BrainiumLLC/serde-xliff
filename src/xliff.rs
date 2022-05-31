@@ -3,12 +3,17 @@ use serde::{de::Visitor, Deserialize, Deserializer};
 #[derive(Debug)]
 pub struct ArgumentString {
     pub sections: Vec<String>,
+    format_string: String,
 }
 
 impl From<String> for ArgumentString {
     fn from(string: String) -> Self {
         let sections = string.split("%").map(str::to_string).collect::<Vec<_>>();
-        Self { sections }
+        let format_string = string.replace("%", "{}");
+        Self {
+            sections,
+            format_string,
+        }
     }
 }
 
