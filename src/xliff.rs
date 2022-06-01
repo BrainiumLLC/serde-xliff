@@ -19,32 +19,24 @@ pub enum XliffError {
 }
 
 #[derive(Debug)]
-pub struct ArgumentString {
-    pub sections: Vec<String>,
+pub struct FormatString {
     pub format_string: String,
 }
 
-impl From<&str> for ArgumentString {
+impl From<&str> for FormatString {
     fn from(string: &str) -> Self {
         // this implementation behaves subtly differently than our old games when encountering the literal string %%
         let separator = regex::Regex::new(r"%([0-9]+)").unwrap();
-        let sections = separator
-            .split(&string)
-            .map(str::to_string)
-            .collect::<Vec<_>>();
         let format_string = separator
             .replace_all(&string, |caps: &Captures| format!("{{arg_{}}}", &caps[1]))
             .to_string();
-        Self {
-            sections,
-            format_string,
-        }
+        Self { format_string }
     }
 }
 
 struct ArgumentStringVisitor;
 impl<'de> Visitor<'de> for ArgumentStringVisitor {
-    type Value = ArgumentString;
+    type Value = FormatString;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         formatter.write_str("a string with optional arguments marked by `%`")
@@ -59,7 +51,7 @@ impl<'de> Visitor<'de> for ArgumentStringVisitor {
     }
 }
 
-impl<'de> Deserialize<'de> for ArgumentString {
+impl<'de> Deserialize<'de> for FormatString {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
@@ -72,9 +64,9 @@ impl<'de> Deserialize<'de> for ArgumentString {
 #[serde(rename_all = "kebab-case")]
 pub struct TransUnit {
     pub id: String,
-    pub source: ArgumentString,
+    pub source: FormatString,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub target: Option<ArgumentString>,
+    pub target: Option<FormatString>,
 }
 
 #[derive(Debug, Deserialize)]
