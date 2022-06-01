@@ -1,0 +1,13 @@
+<xliff version='1.2' xmln='urn:oasis:names:tc:xliff:document:1.2'>
+<file original='strings.xliff' source-language='en' target-language='en' datatype='plaintext'>
+<body>
+    <trans-unit id="Test1">
+            <source>Test 1</source>
+            </trans-unit>
+    <trans-unit id="Test 2">
+        <source>Test2</source>
+        </trans-unit>
+</body>
+</file>
+</xliff>
+
