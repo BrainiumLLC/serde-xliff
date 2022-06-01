@@ -106,15 +106,11 @@ impl Xliff {
         &self.file.body.trans_unit
     }
 
-    pub fn from_source_dir_and_localization(
-        path: impl AsRef<Path>,
-        localization: &str,
-    ) -> Result<Self, XliffError> {
+    pub fn from_path(path: impl AsRef<Path>) -> Result<Self, XliffError> {
         let path = path.as_ref();
 
-        let file_path = path.join(&localization).join("strings.xliff");
-        let f = StdFile::open(&file_path).map_err(|source| XliffError::CouldNotOpenFile {
-            path: file_path,
+        let f = StdFile::open(&path).map_err(|source| XliffError::CouldNotOpenFile {
+            path: path.to_owned(),
             source,
         })?;
         let xliff = serde_xml_rs::de::from_reader(BufReader::new(f))?;
