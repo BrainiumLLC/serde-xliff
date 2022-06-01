@@ -7,8 +7,8 @@ pub struct ArgumentString {
     pub format_string: String,
 }
 
-impl From<String> for ArgumentString {
-    fn from(string: String) -> Self {
+impl From<&str> for ArgumentString {
+    fn from(string: &str) -> Self {
         // this implementation behaves subtly differently than our old games when encountering the literal string %%
         let separator = regex::Regex::new(r"%([0-9]+)").unwrap();
         let sections = separator
@@ -34,13 +34,6 @@ impl<'de> Visitor<'de> for ArgumentStringVisitor {
     }
 
     fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
-    where
-        E: serde::de::Error,
-    {
-        self.visit_string(value.to_string())
-    }
-
-    fn visit_string<E>(self, value: String) -> Result<Self::Value, E>
     where
         E: serde::de::Error,
     {

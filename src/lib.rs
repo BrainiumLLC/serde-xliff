@@ -11,7 +11,7 @@ use xliff::Xliff;
 pub enum XliffError {
     #[error("path {0:?} contained invalid utf-8")]
     InvalidUtf8(PathBuf),
-    #[error("path {path:?} contained invalid utf-8: {source:?}")]
+    #[error("Could not open file at {path:?}: {source:?}")]
     CouldNotOpenFile {
         path: PathBuf,
         source: std::io::Error,
@@ -25,6 +25,13 @@ pub enum XliffError {
     DeserializeError(#[from] serde_xml_rs::Error),
     #[error("directory {0:?} contained invalid utf-8")]
     InvalidFileName(OsString),
+    #[error("invalid DirEntry at {path:?}: {source:?}")]
+    InvalidDirEntry {
+        path: PathBuf,
+        source: std::io::Error,
+    },
+    #[error("expected directory at path: {0:?}")]
+    FileIsNotDirectory(PathBuf),
 }
 
 #[derive(Debug, Default)]
@@ -42,24 +49,31 @@ impl StringFiles {
                 source,
             })?
         {
-            if let Ok(entry) = localization {
-                assert!(entry.file_type().unwrap().is_dir());
-                let directory = entry.file_name();
-                let file_path = path.join(&directory).join("strings.xliff");
-                let f =
-                    StdFile::open(&file_path).map_err(|source| XliffError::CouldNotOpenFile {
-                        path: file_path,
-                        source,
-                    })?;
-                let xliff: Xliff = serde_xml_rs::de::from_reader(BufReader::new(f))?;
-                files.files.insert(
-                    directory
-                        .to_str()
-                        .ok_or_else(|| XliffError::InvalidFileName(directory.clone()))?
-                        .to_string(),
-                    xliff,
-                );
-            }
+            let entry = localization.map_err(|source| XliffError::InvalidDirEntry {
+                path: path.to_owned(),
+                source,
+            })?;
+            entry
+                .file_type()
+                .unwrap()
+                .is_dir()
+                .then(|| ())
+                .ok_or_else(|| XliffError::FileIsNotDirectory(path.to_owned()))?;
+
+            let directory = entry.file_name();
+            let file_path = path.join(&directory).join("strings.xliff");
+            let f = StdFile::open(&file_path).map_err(|source| XliffError::CouldNotOpenFile {
+                path: file_path,
+                source,
+            })?;
+            let xliff: Xliff = serde_xml_rs::de::from_reader(BufReader::new(f))?;
+            files.files.insert(
+                directory
+                    .to_str()
+                    .ok_or_else(|| XliffError::InvalidFileName(directory.clone()))?
+                    .to_string(),
+                xliff,
+            );
         }
         Ok(files)
     }
