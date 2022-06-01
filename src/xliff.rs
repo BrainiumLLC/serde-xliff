@@ -1,5 +1,22 @@
 use regex::Captures;
 use serde::{de::Visitor, Deserialize, Deserializer};
+use std::{
+    fs::File as StdFile,
+    io::BufReader,
+    path::{Path, PathBuf},
+};
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum XliffError {
+    #[error("Could not open file at {path:?}: {source:?}")]
+    CouldNotOpenFile {
+        path: PathBuf,
+        source: std::io::Error,
+    },
+    #[error(transparent)]
+    DeserializeError(#[from] serde_xml_rs::Error),
+}
 
 #[derive(Debug)]
 pub struct ArgumentString {
@@ -63,29 +80,44 @@ pub struct TransUnit {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct Body {
-    trans_unit: Vec<TransUnit>,
+    pub trans_unit: Vec<TransUnit>,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct File {
-    original: String,
-    source_language: String,
-    target_language: String,
-    datatype: String,
-    body: Body,
+    pub original: String,
+    pub source_language: String,
+    pub target_language: String,
+    pub datatype: String,
+    pub body: Body,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct Xliff {
-    version: String,
-    xmln: String,
-    file: File,
+    pub version: String,
+    pub xmln: String,
+    pub file: File,
 }
 
 impl Xliff {
     pub fn translation_units(&self) -> &[TransUnit] {
         &self.file.body.trans_unit
+    }
+
+    pub fn from_source_dir_and_localization(
+        path: impl AsRef<Path>,
+        localization: &str,
+    ) -> Result<Self, XliffError> {
+        let path = path.as_ref();
+
+        let file_path = path.join(&localization).join("strings.xliff");
+        let f = StdFile::open(&file_path).map_err(|source| XliffError::CouldNotOpenFile {
+            path: file_path,
+            source,
+        })?;
+        let xliff = serde_xml_rs::de::from_reader(BufReader::new(f))?;
+        Ok(xliff)
     }
 }
