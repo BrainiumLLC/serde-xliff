@@ -9,6 +9,7 @@ pub struct ArgumentString {
 
 impl From<String> for ArgumentString {
     fn from(string: String) -> Self {
+        // this implementation behaves subtly differently than our old games when encountering the literal string %%
         let separator = regex::Regex::new(r"%([0-9]+)").unwrap();
         let sections = separator
             .split(&string)
