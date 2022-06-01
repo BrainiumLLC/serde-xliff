@@ -62,6 +62,8 @@ impl<'de> Deserialize<'de> for ArgumentString {
 pub struct TransUnit {
     pub id: String,
     pub source: ArgumentString,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub target: Option<ArgumentString>,
 }
 
 #[derive(Debug, Deserialize)]
