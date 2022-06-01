@@ -21,6 +21,7 @@ pub enum XliffError {
 #[derive(Debug)]
 pub struct FormatString {
     pub format_string: String,
+    pub num_arguments: usize,
 }
 
 impl From<&str> for FormatString {
@@ -30,7 +31,11 @@ impl From<&str> for FormatString {
         let format_string = separator
             .replace_all(&string, |caps: &Captures| format!("{{arg_{}}}", &caps[1]))
             .to_string();
-        Self { format_string }
+        let num_arguments = separator.split(&string).count() - 1;
+        Self {
+            format_string,
+            num_arguments,
+        }
     }
 }
 
