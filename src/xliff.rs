@@ -113,4 +113,9 @@ impl Xliff {
         let xliff = serde_xml_rs::de::from_reader(BufReader::new(f))?;
         Ok(xliff)
     }
+
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, XliffError> {
+        let xliff = serde_xml_rs::de::from_reader(bytes)?;
+        Ok(xliff)
+    }
 }
