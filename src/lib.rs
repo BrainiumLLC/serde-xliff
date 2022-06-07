@@ -1,3 +1,3 @@
 mod xliff;
 
-pub use xliff::Xliff;
+pub use xliff::{Xliff, TransUnit};
